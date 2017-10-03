@@ -42,14 +42,14 @@ romperse <- function(tam, cuantos) {
       resultado <- c(resultado, t, tam - t)
     }
   }
-  stopifnot(sum(resultado) == tam * cuantos) # no hubo perdidas
+  assert(sum(resultado) == tam * cuantos) # no hubo perdidas
   return(resultado)
 }
 unirse <- function(tam, cuantos) {
   unir <- round(union(tam) * cuantos) # independientes
   if (unir > 0) {
     division <- c(rep(-tam, unir), rep(tam, cuantos - unir))
-    stopifnot(sum(abs(division)) == tam * cuantos)
+    assert(sum(abs(division)) == tam * cuantos)
     return(division)
   } else {
     return(rep(tam, cuantos))
@@ -60,66 +60,43 @@ names(freq) <- c("tam", "num")
 freq$tam <- as.numeric(levels(freq$tam))[freq$tam]
 duracion <- 5
 digitos <- floor(log(duracion, 10)) + 1
-suppressMessages(library(doParallel))
-registerDoParallel(makeCluster(detectCores() - 1))
-
 for (paso in 1:duracion) {
   assert(sum(cumulos) == n)
-  ####################################inicia romperse
-  #for (i in 1:dim(freq)[1]) { # fase de rotura
-  f1<-function (){
-    cumulos <- integer()
+  cumulos <- integer()
+  for (i in 1:dim(freq)[1]) { # fase de rotura
     urna <- freq[i,]
     if (urna$tam > 1) { # no tiene caso romper si no se puede
-    cumulos <- c(cumulos, romperse(urna$tam, urna$num))
+      cumulos <- c(cumulos, romperse(urna$tam, urna$num))
     } else {
       cumulos <- c(cumulos, rep(1, urna$num))
     }
-    return(cumulos)
   }
-  cumulos=foreach(i=1:dim(freq)[1], .combine=c)%dopar%f1()
-  
-  #####################################termina romperse
   assert(sum(cumulos) == n)
   assert(length(cumulos[cumulos == 0]) == 0) # que no haya vacios
   freq <- as.data.frame(table(cumulos)) # actualizar urnas
   names(freq) <- c("tam", "num")
   freq$tam <- as.numeric(levels(freq$tam))[freq$tam]
   assert(sum(freq$num * freq$tam) == n)
-  
-  ####################################incia unirse
-  #for (i in 1:dim(freq)[1]) { # fase de union
-   f2<-function (){
-     cumulos <- integer()
-     urna <- freq[i,]
+  cumulos <- integer()
+  for (i in 1:dim(freq)[1]) { # fase de union
+    urna <- freq[i,]
     cumulos <- c(cumulos, unirse(urna$tam, urna$num))
-  return(cumulos)
   }
-  cumulos=foreach(i=1:dim(freq)[1], .combine=c)%dopar%f2()
- 
-  #####################################termina unirse
   assert(sum(abs(cumulos)) == n)
   assert(length(cumulos[cumulos == 0]) == 0) # que no haya vacios
   juntarse <- -cumulos[cumulos < 0]
-  positivos <- cumulos[cumulos > 0]
-  assert(sum(positivos) + sum(juntarse) == n)
+  cumulos <- cumulos[cumulos > 0]
+  assert(sum(cumulos) + sum(juntarse) == n)
   nt <- length(juntarse)
   if (nt > 0) {
     if (nt > 1) {
       juntarse <- sample(juntarse)
-  ####################################inicia juntarse    
-    
-       # for (i in 1:floor(nt / 2) ) {
-      f3<-function(){
-        suma <- juntarse[2*i-1] + juntarse[2*i]
-        return(suma)
-        }
-    par=foreach(i=1:floor(nt / 2), .combine=c)%dopar%f3()
-       cumulos<-c(positivos, par)
-  ####################################termina juntarse    
+      for (i in 1:floor(nt / 2) ) {
+        cumulos <- c(cumulos, juntarse[2*i-1] + juntarse[2*i])
+      }
     }
     if (nt %% 2 == 1) {
-      cumulos <- c(par,positivos, juntarse[nt])
+      cumulos <- c(cumulos, juntarse[nt])
     }
   }
   assert(sum(cumulos) == n)
@@ -131,13 +108,11 @@ for (paso in 1:duracion) {
   while (nchar(tl) < digitos) {
     tl <- paste("0", tl, sep="")
   }
-  stopImplicitCluster() 
- png(paste("p8_ct_par", tl, ".png", sep=""), width=300, height=300)
- #tope <- 50 * ceiling(max(cumulos) / 50)
-  hist(cumulos, #breaks=seq(0, tope, 50), 
+  png(paste("p8_ct_or", tl, ".png", sep=""), width=300, height=300)
+      hist(cumulos, 
        main=paste("Paso", paso, "con ambos fen\u{00f3}menos"), freq=FALSE,
        ylim=c(0, 0.2), xlab="Tama\u{00f1}o", ylab="Frecuencia relativa")
- graphics.off()
+  graphics.off()
 }
 timef<-Sys.time()
 tiempo<-(timef-timei)
