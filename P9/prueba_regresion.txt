@@ -1,0 +1,19 @@
+Call:
+lm(formula = datos$velocidad ~ log(datos$masa) + datos$carga, 
+    data = datos)
+
+Residuals:
+       Min         1Q     Median         3Q        Max 
+-1.265e-03 -1.753e-04  1.328e-05  1.923e-04  1.826e-03 
+
+Coefficients:
+                  Estimate Std. Error t value Pr(>|t|)    
+(Intercept)      2.000e-04  9.083e-05   2.202   0.0326 *  
+log(datos$masa) -6.502e-04  4.987e-05 -13.039   <2e-16 ***
+datos$carga     -1.341e-05  1.706e-04  -0.079   0.9377    
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+Residual standard error: 0.0004997 on 47 degrees of freedom
+Multiple R-squared:  0.7906,	Adjusted R-squared:  0.7817 
+F-statistic: 88.72 on 2 and 47 DF,  p-value: < 2.2e-16
