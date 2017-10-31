@@ -26,21 +26,18 @@ r <- 5
 c <- 3
 dim <- r * c
 
-
-tranqui <- 0.99
 tasa <- 0.15
+tranqui <- 0.99
 
 tope <- 9
 digitos <- 0:tope
 k <- length(digitos)
-#contadores <- matrix(rep(0, k*(k+1)), nrow=k, ncol=(k+1))
-#rownames(contadores) <- 0:tope
-#colnames(contadores) <- c(0:tope, NA)
+contadores <- matrix(rep(0, k*(k+1)), nrow=k, ncol=(k+1))
+rownames(contadores) <- 0:tope
+colnames(contadores) <- c(0:tope, NA)
 
 n <- floor(log(k-1, 2)) + 1
 neuronas <- matrix(runif(n * dim), nrow=n, ncol=dim) # perceptrones
-
-##########################################
 
 for (t in 1:5000) { # entrenamiento
   d <- sample(0:tope, 1)
@@ -57,13 +54,8 @@ for (t in 1:5000) { # entrenamiento
     }
   }
 }
-
-##########################################
-pr=1000
-suppressMessages(library(doParallel))
-registerDoParallel(makeCluster(detectCores() - 1))
-#for (t in 1:300) { # prueba
-f2<-function(){
+cuenta<-rep(FALSE,pr)
+for (t in 1:pr) { # prueba
   d <- sample(0:tope, 1)
   pixeles <- runif(dim) < modelos[d + 1,] # fila 1 contiene el cero, etc.
   correcto <- binario(d, n)
@@ -75,17 +67,12 @@ f2<-function(){
     salida[i] <- resultado
   }
   r <- min(decimal(salida, n), k) # todos los no-existentes van al final
-  if(r==d){
-    return(TRUE)
-  }
+     contadores[d+1, r+1] <- contadores[d+1, r+1] + 1
+     cuenta[t]<-(r==d)
 }
-
-cuenta<-foreach(t=1:pr, .combine=c) %dopar% f2()
 bueno=sum(cuenta)
-porcentaje=(bueno/pr)*100
+porcentaje=round((bueno/pr)*100,2)
 print(porcentaje)
-#contadores[d+1, r+1] <- contadores[d+1, r+1] + 1
-stopImplicitCluster()
 #print(contadores)
 timef<-Sys.time()
 tiempo<-(timef-timei)
