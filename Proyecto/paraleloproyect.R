@@ -92,7 +92,7 @@ png("p11_init.png")
 plot(Soluciones[,1], Soluciones[,2], xlab="diámetro (min)", ylab="voltaje (min)", main="Relación de parámetros")
 graphics.off()
 png("p_mejores.png")
-plot(Soluciones[,1], Soluciones[,2], xlab="distancia (mejor con cuadro azul)",
+plot(Soluciones[,1], Soluciones[,2], xlab="Diámetro (mejor con cuadro azul)",
      ylab="voltaje (mejor con bolita naranja)",
      main="Relación de parámetros")
 points(Soluciones[mejordiam, 1], Soluciones[mejordiam, 2], col="blue", pch=15, cex=1.5)
@@ -116,8 +116,8 @@ no.dom<-rbind(no.dom,foreach(i = 1:n, .combine=rbind)%dopar% p3(i))
 
 frente <- subset(Soluciones, no.dom) # solamente las no dominadas
 png("p_frente.png")
-plot (Soluciones[,1], Soluciones[,2], xlab= "mejor con cuadro azul",
-     ylab="mejor con bolita naranja",
+plot (Soluciones[,1], Soluciones[,2], xlab= "Diámetro",
+     ylab="Voltaje",
      main="Frente de Pareto")
 points(frente[,1], frente[,2], col="green", pch=16, cex=1.5)
 graphics.off()
@@ -132,7 +132,7 @@ if(dimfrente>2){
     d<- sqrt((ordenf[i,1]-ordenf[i+1,1])**2+(ordenf[i,2]-ordenf[i+1,2])**2)
     dis<-c(dis,d)
   }
-  umbral<-mean(dis)
+  umbral<-mean(dis-14.5)
   nuevo<-rep(FALSE,dimfrente)
   for(i in 1:dimfrente){
     if (ordenf[i,]==head(ordenf,n=1)||ordenf[i,]==tail(ordenf,n=1)){
@@ -156,7 +156,7 @@ library(ggplot2)
     xlab("Diametro") +
     ylab("Voltaje") +
     geom_point(data = frente, aes(x=frente[,1],y=frente[,2]), color="blue", size=4)+
-    geom_point(data = mejor, aes(x=mejor[,1],y=mejor[,2]), color="red", size=4)+
+    geom_point(data = mejor, aes(x=mejor[,1],y=mejor[,2]), color="red", size=2)+
     theme(plot.title = element_text(hjust = 0.5))+
     ggtitle("Diversificación de frente")+
     theme(axis.text=element_text(size=12),
