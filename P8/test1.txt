@@ -1,0 +1,37 @@
+Welch Two Sample t-test
+
+data:  datosorig and datospara
+t = -6.9323, df = 4.3183, p-value =
+0.001706
+alternative hypothesis: true difference in means is not equal to 0
+95 percent confidence interval:
+ -0.3728419 -0.1639577
+sample estimates:
+mean of x mean of y 
+ 1.018449  1.286849 
+
+
+	Welch Two Sample t-test
+
+data:  datosorig and datospara
+t = 8.6151, df = 4.9428, p-value =
+0.0003682
+alternative hypothesis: true difference in means is not equal to 0
+95 percent confidence interval:
+ 0.4994169 0.9263126
+sample estimates:
+mean of x mean of y 
+ 2.657955  1.945090 
+
+
+	Welch Two Sample t-test
+
+data:  datosorig and datospara
+t = 23.886, df = 4.1228, p-value =
+1.41e-05
+alternative hypothesis: true difference in means is not equal to 0
+95 percent confidence interval:
+ 2.244569 2.827237
+sample estimates:
+mean of x mean of y 
+ 5.099928  2.564025 

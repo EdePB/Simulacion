@@ -1,7 +1,5 @@
 n <- 50
 p <- data.frame(x = rnorm(n), y=rnorm(n), c=rnorm(n), m=abs(rnorm(n)))
-dens<-0.5
-p$r<-sqrt(p$m/(dens*pi))
 xmax <- max(p$x)
 xmin <- min(p$x)
 p$x <- (p$x - xmin) / (xmax - xmin) # ahora son de 0 a 1
@@ -21,14 +19,14 @@ colores <- rgb(niveles, rep(0, 11), rev(niveles), max=255)
 ###########################graficar con ggplot
 library(ggplot2)
 ggplot() +
-  geom_point(data=p, aes(x = p$x, y= p$y, size=p$r, color=p$g))+
+  geom_point(data=p, aes(x = p$x, y= p$y, size=p$m, color=p$g))+
   scale_colour_manual(values=colores)+ 
   ggtitle("Partículas")+
   theme(plot.title = element_text(hjust = 0.5))+
-  guides(size=guide_legend(title = "radio"),color=guide_legend(title="carga"))+
+  guides(size=FALSE,color=guide_legend(title="carga"))+
   scale_x_continuous(name="x",limits = c(0, 1))+
   scale_y_continuous(name="y", limits = c(0, 1))
-ggsave("P9_parts.png")
+ggsave("P9T_pariculas.png")
 ############################
 eps <- 0.001
 fuerza <- function(i) {
@@ -56,17 +54,31 @@ fuerza <- function(i) {
 suppressMessages(library(doParallel))
 registerDoParallel(makeCluster(detectCores() - 1))
 tmax <- 100
-
+#digitos <- floor(log(tmax, 10)) + 1
+#tl <- "0"
+#while (nchar(tl) < digitos) {
+#  tl <- paste("0", tl, sep="")
+#}
+#png(paste("p9_t", tl, ".png", sep=""))
+#plot(p$x, p$y, col=colores[p$g+6], pch=15, cex=1.5, xlim=c(-0.1, 1.1), ylim=c(-0.1, 1.1),
+ #    main="Estado inicial", xlab="X", ylab="Y")
+#graphics.off()
 #######################graficar estado inicial con ggplot
 ggplot()+
-  geom_point(data = p, aes(x= p$x, y= p$y, size=p$r, color= p$g))+
+  geom_point(data = p, aes(x= p$x, y= p$y, size=p$m, color= p$g))+
   scale_color_manual(values = colores)+
   ggtitle("Estado inicial")+
   theme(plot.title = element_text(hjust = 0.5))+
-  guides(size=guide_legend(title = "tamaño"), color=guide_legend(title = "carga"))+
+  guides(size=FALSE, color=guide_legend(title = "carga"))+
   scale_x_continuous(name = "x", limits = c(0,1))+
   scale_y_continuous(name = "y", limits = c(0,1))
-ggsave("P9_pR1_0.png")
+ggsave("P9_p_0.png")
+
+##############################
+
+pos<-data.frame()
+posi=cbind(p$x,p$y)#guardamos cada posicion de cada particula inicialmente
+datos<-data.frame()
 
 ##############################
 
@@ -76,37 +88,63 @@ for (iter in 1:tmax) {
   p$x <- foreach(i = 1:n, .combine=c) %dopar% max(min(p[i,]$x + delta * (f[c(TRUE, FALSE)][i]), 1), 0)
   p$y <- foreach(i = 1:n, .combine=c) %dopar% max(min(p[i,]$y + delta * (f[c(FALSE, TRUE)][i]), 1), 0)
  
+  #tl <- paste(iter, "", sep="")
+  #while (nchar(tl) < digitos) {
+   # tl <- paste("0", tl, sep="")
+  #}
+ # png(paste("p9_t", tl, ".png", sep=""))
+  #plot(p$x, p$y, col=colores[p$g+6], pch=15, cex=1.5, xlim=c(-0.1, 1.1), ylim=c(-0.1, 1.1),
+  #     main=paste("Paso", iter), xlab="X", ylab="Y")
+  #graphics.off()
 ############################graficamos cada paso
   ggplot()+
-    geom_point(data = p, aes(x= p$x, y= p$y, size=p$r, color= p$g))+
+    geom_point(data = p, aes(x= p$x, y= p$y, size=p$m, color= p$g))+
     scale_color_manual(values = colores)+
     ggtitle(paste("paso",iter))+
     theme(plot.title = element_text(hjust = 0.5))+
-    guides(size=guide_legend(title = "tamaño"), color=guide_legend(title = "carga"))+
+    guides(size=FALSE, color=guide_legend(title = "carga"))+
     scale_x_continuous(name = "x", limits = c(0,1))+
     scale_y_continuous(name = "y", limits = c(0,1))
-  ggsave(paste("P9_pR1_",iter,".png"))
+  ggsave(paste("P9_p_",iter,".png"))
 ############################  
   
 }
+posf=cbind(p$x,p$y) #guardamos cada posicion de cada particula al final
+colnames(posi)=c("xi","yi")
+colnames(posf)=c("xf","yf")
+#############################medimos la distancia euclidiana entre el inicio y el final
+dx <- posi[,1] - posf[,1]
+dy <- posi[,2] - posf[,2]
+for(i in 1:n){
+d <- sqrt(dx[i]^2 + dy[i]^2)
+pos<-cbind(d,d/100, p[i,]$m)
+datos<-rbind(datos, pos)
+}
+datos$carga=p$c
+colnames(datos)=c("distancia","velocidad", "masa", "carga")
+#############################
+
+ggplot(data = datos, aes(x= datos$masa, y= datos$velocidad, color= datos$carga))+
+  geom_point(size=2)+
+  geom_smooth(method = "loess", se=FALSE, formula =y ~ log(x) )+
+  stat_summary(fun.y = mean, geom = "point",
+               size = 0.5, color = "black")+
+  ggtitle("Correlación")+
+  guides(size=FALSE, color=guide_legend(title = "carga"))+
+  scale_x_continuous(name = "masa")+
+  scale_y_continuous(name = "velocidad")+
+  theme(plot.title = element_text(hjust = 0.5))+
+  ggsave("P9T_correlacion.png")
+
+
+
+
+fit <- lm(datos$velocidad ~ log(datos$masa)+ datos$carga, data = datos)
+summary(fit)  
 
 stopImplicitCluster()
 
-ggplot(data = p, aes(x= p$m, y= p$r))+
-  geom_point(size=2)+
-  geom_smooth(method = "loess", se=FALSE, formula =y ~ x )+
-  stat_summary(fun.y = mean, geom = "point",
-               size = 0.5, color = "black")+
-  ggtitle("Correlación radio-masa")+
-  scale_x_continuous(name = "masa")+
-  scale_y_continuous(name = "radio")+
-  theme(plot.title = element_text(hjust = 0.5))+
-  ggsave("P9T_c_radiomasa.png")
-
-fit <- lm(p$r ~ p$m, data = p)
-summary(fit)
-
 library(magick)
-frames=lapply(1:tmax,function(x) image_read(paste("P9_pR1_",x,".png")))
+frames=lapply(1:tmax,function(x) image_read(paste("P9_p_",x,".png")))
 animation <- image_animate(image_join(frames), fps=100)
-image_write(animation, paste("P9_Reto1", ".gif"))
+image_write(animation, paste("P9_Rpr", ".gif"))

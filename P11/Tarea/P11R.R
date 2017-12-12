@@ -5,7 +5,6 @@ Tp<-numeric()
 suppressMessages(library(doParallel))
 registerDoParallel(makeCluster(detectCores() - 1))
 for(corrida in 1:5) {
-for(k in seq(5, 30, 5)){
   for(n in seq(100, 200, 50)){
 
 
@@ -33,7 +32,7 @@ for(k in seq(5, 30, 5)){
   Tiempos<-  rbind(Tiempos,Tnp, Tp)
     }  
   }
-}
+
 stopImplicitCluster()
 save.image(file="datosR11_1.RData")
 colnames (Tiempos)= c("Tipo","Tiempo","Objetivos", "Soluciones", "corrida")

@@ -1,0 +1,45 @@
+Concentration	Applied Voltage	 Tip-to-Collector Distance	Average Fiber Diameter (nm) 
+16		 20			 10	 			 263.33
+16		 10		 	 15				 313.58
+8		 20			 15				 69.05 
+8 		 10			 10				 46.44 
+9.6		 15			 12.5				 27.78
+14.4 		 15 			 12.5				 113.39
+12		 12			 12.5				 105.51
+12		 18			 12.5				 45.36
+12		 15			 11				 43.02
+12		 15			 14				 98.50
+12		 15			 12.5				 54.80
+12		 15			 12.5				 68.10
+12		 15			 12.5				 84.36
+12		 15			 12.5				 72.40
+12		 15			 12.5				 52.22
+
+Capillary (mm)	Electric potential (kV)	Diameter (nm)
+0.45		15			556±120
+		20			501±156
+		25			472±120
+0.55		15			364±63
+		20			376±71
+		25			415±80
+0.70		15			409±91
+		20			780±202
+		25			806±399
+0.80		15			966±262
+		20			716±210
+		25			646±170
+
+
+distancia 15 cm, tasa 0.2 mL/h
+Voltaje(kV)	Diametro
+5		218+-20
+8		241+-31
+10		230+-63
+13		254+-76
+
+
+y=0.7926x^-2.6561 (distancia del colector)
+y=0.9304x-0.1038 (Concentracion polimero)
+y=0.2029x+0.7544 (potencial electrico)
+
+conjunto de variables se asignan valores en donde se optimicen dos o mas funciones objetivo.

@@ -56,7 +56,15 @@ fuerza <- function(i) {
 suppressMessages(library(doParallel))
 registerDoParallel(makeCluster(detectCores() - 1))
 tmax <- 100
-
+#digitos <- floor(log(tmax, 10)) + 1
+#tl <- "0"
+#while (nchar(tl) < digitos) {
+#  tl <- paste("0", tl, sep="")
+#}
+#png(paste("p9_t", tl, ".png", sep=""))
+#plot(p$x, p$y, col=colores[p$g+6], pch=15, cex=1.5, xlim=c(-0.1, 1.1), ylim=c(-0.1, 1.1),
+ #    main="Estado inicial", xlab="X", ylab="Y")
+#graphics.off()
 #######################graficar estado inicial con ggplot
 ggplot()+
   geom_point(data = p, aes(x= p$x, y= p$y, size=p$r, color= p$g))+
@@ -76,6 +84,14 @@ for (iter in 1:tmax) {
   p$x <- foreach(i = 1:n, .combine=c) %dopar% max(min(p[i,]$x + delta * (f[c(TRUE, FALSE)][i]), 1), 0)
   p$y <- foreach(i = 1:n, .combine=c) %dopar% max(min(p[i,]$y + delta * (f[c(FALSE, TRUE)][i]), 1), 0)
  
+  #tl <- paste(iter, "", sep="")
+  #while (nchar(tl) < digitos) {
+   # tl <- paste("0", tl, sep="")
+  #}
+ # png(paste("p9_t", tl, ".png", sep=""))
+  #plot(p$x, p$y, col=colores[p$g+6], pch=15, cex=1.5, xlim=c(-0.1, 1.1), ylim=c(-0.1, 1.1),
+  #     main=paste("Paso", iter), xlab="X", ylab="Y")
+  #graphics.off()
 ############################graficamos cada paso
   ggplot()+
     geom_point(data = p, aes(x= p$x, y= p$y, size=p$r, color= p$g))+
@@ -89,24 +105,21 @@ for (iter in 1:tmax) {
 ############################  
   
 }
+posf=cbind(p$x,p$y)
+colnames(posi)=c("xi","yi")
+colnames(posf)=c("xf","yf")
+dx <- posi[,1] - posf[,1]
+dy <- posi[,2] - posf[,2]
+for(i in 1:n){
+d <- sqrt(dx[i]^2 + dy[i]^2)
+pos<-cbind(d,d/100, p[i,]$m)
+datos<-rbind(datos, pos)
+}
 
+  
 stopImplicitCluster()
 
-ggplot(data = p, aes(x= p$m, y= p$r))+
-  geom_point(size=2)+
-  geom_smooth(method = "loess", se=FALSE, formula =y ~ x )+
-  stat_summary(fun.y = mean, geom = "point",
-               size = 0.5, color = "black")+
-  ggtitle("Correlación radio-masa")+
-  scale_x_continuous(name = "masa")+
-  scale_y_continuous(name = "radio")+
-  theme(plot.title = element_text(hjust = 0.5))+
-  ggsave("P9T_c_radiomasa.png")
-
-fit <- lm(p$r ~ p$m, data = p)
-summary(fit)
-
 library(magick)
-frames=lapply(1:tmax,function(x) image_read(paste("P9_pR1_",x,".png")))
+frames=lapply(1:tmax,function(x) image_read(paste("P9_paso_",x,".png")))
 animation <- image_animate(image_join(frames), fps=100)
-image_write(animation, paste("P9_Reto1", ".gif"))
+image_write(animation, paste("P9_Rpr", ".gif"))
